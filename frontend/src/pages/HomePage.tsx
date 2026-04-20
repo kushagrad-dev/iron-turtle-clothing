@@ -119,26 +119,30 @@ const HomePage: React.FC = () => {
                   Relentless design. Unbreakable spirit.
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <Button
-                    variant="contained"
-                    size="large"
-                    component={Link}
-                    to="/products"
-                    endIcon={<ArrowForward />}
-                    sx={{ px: 5, py: 1.5 }}
-                    id="hero-shop-btn"
-                  >
-                    Shop Collection
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    component={Link}
-                    to="/products?category=gym"
-                    sx={{ px: 4, py: 1.5 }}
-                  >
-                    Gym Essentials
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      component={Link}
+                      to="/products"
+                      endIcon={<ArrowForward />}
+                      sx={{ px: 5, py: 1.5, height: '100%' }}
+                      id="hero-shop-btn"
+                    >
+                      Shop Collection
+                    </Button>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      variant="outlined"
+                      size="large"
+                      component={Link}
+                      to="/products?category=gym"
+                      sx={{ px: 4, py: 1.5, height: '100%' }}
+                    >
+                      Gym Essentials
+                    </Button>
+                  </motion.div>
                 </Box>
               </motion.div>
             </Grid>
@@ -149,37 +153,42 @@ const HomePage: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
               >
-                <Box sx={{
-                  position: 'relative',
-                  width: '100%',
-                  paddingTop: '120%',
-                  borderRadius: 4,
-                  overflow: 'hidden',
-                  boxShadow: `0 40px 80px ${alpha('#000', 0.5)}, 0 0 60px ${alpha('#00ff88', 0.1)}`,
-                  border: `1px solid ${alpha('#00ff88', 0.15)}`,
-                }}>
-                  <Box
-                    component="img"
-                    src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=800&fit=crop"
-                    alt="Iron Turtle Collection"
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                  />
+                <motion.div
+                  animate={{ y: [0, -15, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                >
                   <Box sx={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: '40%',
-                    background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
-                  }} />
-                </Box>
+                    position: 'relative',
+                    width: '100%',
+                    paddingTop: '120%',
+                    borderRadius: 4,
+                    overflow: 'hidden',
+                    boxShadow: `0 40px 80px ${alpha('#000', 0.5)}, 0 0 60px ${alpha('#00ff88', 0.1)}`,
+                    border: `1px solid ${alpha('#00ff88', 0.15)}`,
+                  }}>
+                    <Box
+                      component="img"
+                      src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=800&fit=crop"
+                      alt="Iron Turtle Collection"
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                    />
+                    <Box sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: '40%',
+                      background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
+                    }} />
+                  </Box>
+                </motion.div>
               </motion.div>
             </Grid>
           </Grid>
@@ -379,15 +388,17 @@ const HomePage: React.FC = () => {
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4, lineHeight: 1.8 }}>
               Over 50,000 athletes worldwide have chosen Iron Turtle. Train harder. Look better. Be relentless.
             </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              component={Link}
-              to="/products"
-              sx={{ px: 6, py: 1.5 }}
-            >
-              Start Shopping
-            </Button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="contained"
+                size="large"
+                component={Link}
+                to="/products"
+                sx={{ px: 6, py: 1.5 }}
+              >
+                Start Shopping
+              </Button>
+            </motion.div>
           </motion.div>
         </Container>
       </Box>
