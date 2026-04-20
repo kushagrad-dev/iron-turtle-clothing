@@ -1,10 +1,11 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { Box, CircularProgress } from '@mui/material';
+import { AnimatePresence } from 'framer-motion';
 
 import theme from './theme/theme';
 import { AuthProvider } from './context/AuthContext';
@@ -12,6 +13,7 @@ import { CartProvider } from './context/CartContext';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import PageTransition from './components/common/PageTransition';
 
 // Lazy loaded pages
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -46,6 +48,49 @@ const LoadingFallback = () => (
   </Box>
 );
 
+const AnimatedRoutes: React.FC = () => {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Suspense fallback={<LoadingFallback />} key={location.pathname}>
+        <Routes location={location}>
+          <Route path="/" element={<PageTransition><HomePage /></PageTransition>} />
+          <Route path="/products" element={<PageTransition><ProductsPage /></PageTransition>} />
+          <Route path="/products/:slug" element={<PageTransition><ProductDetailPage /></PageTransition>} />
+          <Route path="/cart" element={<PageTransition><CartPage /></PageTransition>} />
+          <Route path="/login" element={<PageTransition><LoginPage /></PageTransition>} />
+          <Route path="/checkout" element={
+            <ProtectedRoute>
+              <PageTransition><CheckoutPage /></PageTransition>
+            </ProtectedRoute>
+          } />
+          <Route path="/orders" element={
+            <ProtectedRoute>
+              <PageTransition><OrdersPage /></PageTransition>
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <PageTransition><ProfilePage /></PageTransition>
+            </ProtectedRoute>
+          } />
+          <Route path="/wishlist" element={
+            <ProtectedRoute>
+              <PageTransition><WishlistPage /></PageTransition>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin" element={
+            <ProtectedRoute adminOnly>
+              <PageTransition><AdminPage /></PageTransition>
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </Suspense>
+    </AnimatePresence>
+  );
+};
+
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -61,40 +106,7 @@ const App: React.FC = () => {
               }}>
                 <Navbar />
                 <Box component="main" sx={{ flex: 1 }}>
-                  <Suspense fallback={<LoadingFallback />}>
-                    <Routes>
-                      <Route path="/" element={<HomePage />} />
-                      <Route path="/products" element={<ProductsPage />} />
-                      <Route path="/products/:slug" element={<ProductDetailPage />} />
-                      <Route path="/cart" element={<CartPage />} />
-                      <Route path="/login" element={<LoginPage />} />
-                      <Route path="/checkout" element={
-                        <ProtectedRoute>
-                          <CheckoutPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/orders" element={
-                        <ProtectedRoute>
-                          <OrdersPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/profile" element={
-                        <ProtectedRoute>
-                          <ProfilePage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/wishlist" element={
-                        <ProtectedRoute>
-                          <WishlistPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/admin" element={
-                        <ProtectedRoute adminOnly>
-                          <AdminPage />
-                        </ProtectedRoute>
-                      } />
-                    </Routes>
-                  </Suspense>
+                  <AnimatedRoutes />
                 </Box>
                 <Footer />
               </Box>

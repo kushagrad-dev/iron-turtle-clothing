@@ -291,7 +291,7 @@ const Navbar: React.FC = () => {
                             />
                             <Box>
                               <Typography variant="body2" fontWeight={600}>{product.name}</Typography>
-                              <Typography variant="caption" color="primary">${product.price}</Typography>
+                              <Typography variant="caption" color="primary">₹{product.price}</Typography>
                             </Box>
                           </Box>
                         ))}
