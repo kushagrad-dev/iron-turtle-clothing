@@ -3,10 +3,10 @@ import {
   Box, Container, Typography, Grid, Button, TextField, Dialog, DialogTitle,
   DialogContent, DialogActions, IconButton, Chip, Table, TableHead, TableBody,
   TableRow, TableCell, TableContainer, alpha, Tab, Tabs, Select, MenuItem,
-  FormControl, InputLabel, Switch, FormControlLabel, Avatar,
+  FormControl, InputLabel, Switch, FormControlLabel, Avatar, Card, CardContent,
 } from '@mui/material';
-import { Add, Edit, Delete, Inventory, ShoppingCart as OrderIcon } from '@mui/icons-material';
-import { motion } from 'framer-motion';
+import { Add, Edit, Delete, Inventory, ShoppingCart as OrderIcon, Dashboard as DashboardIcon, TrendingUp, AttachMoney, People } from '@mui/icons-material';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   useProducts, useCategories, useCreateProduct, useUpdateProduct,
   useDeleteProduct, useOrders, useUpdateOrderStatus,
@@ -27,14 +27,85 @@ const AdminPage: React.FC = () => {
         </Typography>
 
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 4 }}>
+          <Tab icon={<DashboardIcon />} label="Dashboard" iconPosition="start" sx={{ fontFamily: '"Oswald", sans-serif' }} />
           <Tab icon={<Inventory />} label="Products" iconPosition="start" sx={{ fontFamily: '"Oswald", sans-serif' }} />
           <Tab icon={<OrderIcon />} label="Orders" iconPosition="start" sx={{ fontFamily: '"Oswald", sans-serif' }} />
         </Tabs>
 
-        {tab === 0 && <ProductsTab />}
-        {tab === 1 && <OrdersTab />}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={tab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            {tab === 0 && <DashboardTab />}
+            {tab === 1 && <ProductsTab />}
+            {tab === 2 && <OrdersTab />}
+          </motion.div>
+        </AnimatePresence>
       </Container>
     </Box>
+  );
+};
+
+// =================== DASHBOARD TAB ===================
+const DashboardTab: React.FC = () => {
+  const { data: orders } = useOrders();
+  const { data: products } = useProducts({ limit: 1000 });
+
+  const totalRevenue = orders
+    ?.filter(o => o.status !== 'cancelled')
+    .reduce((sum, o) => sum + o.total, 0) || 0;
+
+  const activeOrders = orders?.filter(o => o.status === 'pending' || o.status === 'processing').length || 0;
+  const totalItems = products?.total || 0;
+
+  const stats = [
+    { label: 'Total Revenue', value: \`₹\${totalRevenue.toFixed(2)}\`, icon: <AttachMoney sx={{ fontSize: 40 }} />, color: '#00ff88' },
+    { label: 'Active Orders', value: activeOrders, icon: <TrendingUp sx={{ fontSize: 40 }} />, color: '#ffd700' },
+    { label: 'Total Products', value: totalItems, icon: <Inventory sx={{ fontSize: 40 }} />, color: '#00bcd4' },
+    { label: 'Total Customers', value: new Set(orders?.map(o => o.user_id)).size || 0, icon: <People sx={{ fontSize: 40 }} />, color: '#ff4d6a' },
+  ];
+
+  return (
+    <Grid container spacing={3}>
+      {stats.map((stat, i) => (
+        <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+          >
+            <Card sx={{ 
+              background: alpha('#141414', 0.8), 
+              border: (theme) => \`1px solid \${alpha(theme.palette.divider, 1)}\`,
+              borderRadius: 3,
+            }}>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 3, p: 3 }}>
+                <Box sx={{ 
+                  p: 2, 
+                  borderRadius: 2, 
+                  background: alpha(stat.color, 0.1),
+                  color: stat.color,
+                }}>
+                  {stat.icon}
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {stat.label}
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700, fontFamily: '"Oswald", sans-serif', mt: 0.5 }}>
+                    {stat.value}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </Grid>
+      ))}
+    </Grid>
   );
 };
 

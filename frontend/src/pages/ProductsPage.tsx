@@ -6,9 +6,22 @@ import {
   Pagination, Button,
 } from '@mui/material';
 import { FilterList, Close } from '@mui/icons-material';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '../components/product/ProductCard';
 import { useProducts, useCategories } from '../hooks/useQueries';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
+};
 
 const ProductsPage: React.FC = () => {
   const theme = useTheme();
@@ -185,20 +198,35 @@ const ProductsPage: React.FC = () => {
 
           {/* Products Grid */}
           <Grid size={{ xs: 12, md: 9 }}>
-            <Grid container spacing={2}>
-              {isLoading
-                ? Array(8).fill(0).map((_, i) => (
-                  <Grid size={{ xs: 6, sm: 4, md: 4 }} key={i}>
-                    <Skeleton variant="rectangular" sx={{ borderRadius: 3, paddingTop: '150%' }} />
+            <AnimatePresence mode="wait">
+              {isLoading ? (
+                <Grid container spacing={2} key="skeleton">
+                  {Array(8).fill(0).map((_, i) => (
+                    <Grid size={{ xs: 6, sm: 4, md: 4 }} key={i}>
+                      <Skeleton variant="rectangular" animation="wave" sx={{ borderRadius: 3, paddingTop: '150%' }} />
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <motion.div
+                  key={\`products-\${page}-\${activeCategory}-\${sortBy}-\${sortOrder}\`}
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                >
+                  <Grid container spacing={2}>
+                    {data?.products?.map((product) => (
+                      <Grid size={{ xs: 6, sm: 4, md: 4 }} key={product.id}>
+                        <motion.div variants={itemVariants} style={{ height: '100%' }}>
+                          <ProductCard product={product} />
+                        </motion.div>
+                      </Grid>
+                    ))}
                   </Grid>
-                ))
-                : data?.products?.map((product) => (
-                  <Grid size={{ xs: 6, sm: 4, md: 4 }} key={product.id}>
-                    <ProductCard product={product} />
-                  </Grid>
-                ))
-              }
-            </Grid>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* No results */}
             {!isLoading && data?.products?.length === 0 && (

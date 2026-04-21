@@ -8,7 +8,6 @@ import {
 import {
   ShoppingCart, FavoriteBorder, Person, Search, Menu as MenuIcon,
   Home, Category, AdminPanelSettings, LocalShipping, Logout,
-  Close, Store,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
@@ -20,10 +19,11 @@ const Navbar: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const { user, profile, isAdmin, signInWithGoogle, signOut } = useAuth();
-  const { itemCount } = useCart();
+  const { items, itemCount, total, removeFromCart, updateQuantity } = useCart();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [scrolled, setScrolled] = useState(false);
@@ -141,7 +141,7 @@ const Navbar: React.FC = () => {
                 </IconButton>
               )}
 
-              <IconButton color="inherit" component={Link} to="/cart" id="cart-btn">
+              <IconButton color="inherit" onClick={() => setCartDrawerOpen(true)} id="cart-btn">
                 <Badge badgeContent={itemCount} color="primary">
                   <ShoppingCart />
                 </Badge>
@@ -348,6 +348,91 @@ const Navbar: React.FC = () => {
             </ListItem>
           ))}
         </List>
+      </Drawer>
+
+      {/* Cart Drawer */}
+      <Drawer
+        anchor="right"
+        open={cartDrawerOpen}
+        onClose={() => setCartDrawerOpen(false)}
+        PaperProps={{
+          sx: { width: { xs: '100%', sm: 400 }, background: '#111', borderLeft: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}` },
+        }}
+      >
+        <Box sx={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 3,
+          borderBottom: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`
+        }}>
+          <Typography variant="h5" fontFamily='"Oswald", sans-serif'>Quick Cart ({itemCount})</Typography>
+          <IconButton onClick={() => setCartDrawerOpen(false)}><Close /></IconButton>
+        </Box>
+
+        <Box sx={{ flex: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {items.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 8 }}>
+              <ShoppingCart sx={{ fontSize: 60, color: 'text.secondary', mb: 2, opacity: 0.3 }} />
+              <Typography variant="h6">Cart is empty</Typography>
+            </Box>
+          ) : (
+            items.map((item) => (
+              <Box key={`${item.product_id}-${item.size}-${item.color}`} sx={{ display: 'flex', gap: 2, p: 2, background: alpha('#222', 0.5), borderRadius: 2 }}>
+                <Box
+                  component="img"
+                  src={item.product.images[0]}
+                  alt={item.product.name}
+                  sx={{ width: 70, height: 90, objectFit: 'cover', borderRadius: 1 }}
+                />
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body2" fontWeight={600} noWrap sx={{ maxWidth: 180 }}>{item.product.name}</Typography>
+                  <Typography variant="caption" color="text.secondary" display="block">
+                    {item.size && `Size: ${item.size}`} {item.color && `| Color: ${item.color}`}
+                  </Typography>
+                  <Typography variant="body2" color="primary.main" fontWeight={700} sx={{ mt: 0.5 }}>₹{(item.product.price * item.quantity).toFixed(2)}</Typography>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', background: alpha('#fff', 0.1), borderRadius: 1 }}>
+                      <IconButton size="small" onClick={() => updateQuantity(item.product_id, item.size, item.color, item.quantity - 1)}><Remove fontSize="inherit" /></IconButton>
+                      <Typography variant="caption" sx={{ px: 1, fontWeight: 700 }}>{item.quantity}</Typography>
+                      <IconButton size="small" onClick={() => updateQuantity(item.product_id, item.size, item.color, item.quantity + 1)}><Add fontSize="inherit" /></IconButton>
+                    </Box>
+                    <IconButton size="small" color="error" onClick={() => removeFromCart(item.product_id, item.size, item.color)}>
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
+              </Box>
+            ))
+          )}
+        </Box>
+
+        {items.length > 0 && (
+          <Box sx={{ p: 3, borderTop: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`, background: '#0a0a0a' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="h6">Subtotal:</Typography>
+              <Typography variant="h6" color="primary.main" fontWeight={700}>₹{total.toFixed(2)}</Typography>
+            </Box>
+            <Button
+              fullWidth
+              variant="contained"
+              size="large"
+              component={Link}
+              to="/checkout"
+              onClick={() => setCartDrawerOpen(false)}
+              sx={{ mb: 1.5 }}
+            >
+              Checkout Now
+            </Button>
+            <Button
+              fullWidth
+              variant="outlined"
+              component={Link}
+              to="/cart"
+              onClick={() => setCartDrawerOpen(false)}
+            >
+              View Full Cart
+            </Button>
+          </Box>
+        )}
       </Drawer>
 
       {/* Spacer for fixed navbar */}
